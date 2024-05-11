@@ -31,10 +31,10 @@ async function run() {
     const jobsCollection = client.db("workWave").collection("jobs");
 
     // get all jobs data
-    // app.get("/jobs", async (req, res) => {
-    //   const result = await jobsCollection.find().toArray();
-    //   res.send(result);
-    // });
+    app.get("/jobs", async (req, res) => {
+      const result = await jobsCollection.find().toArray();
+      res.send(result);
+    });
 
     // get a single jobs data
     // app.get("/job/:id", async (req, res) => {
