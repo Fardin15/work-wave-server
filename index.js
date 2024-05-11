@@ -29,6 +29,7 @@ async function run() {
   try {
     // collections
     const jobsCollection = client.db("workWave").collection("jobs");
+    const appliedCollection = client.db("workWave").collection("appliedJobs");
 
     // get all jobs data
     app.get("/jobs", async (req, res) => {
@@ -44,8 +45,22 @@ async function run() {
       res.send(result);
     });
 
+    // post job data in database
+    app.post("/job", async (req, res) => {
+      const jobData = req.body;
+      const result = await jobsCollection.insertOne(jobData);
+      res.send(result);
+    });
+
+    // post applied data in database
+    app.post("/applied", async (req, res) => {
+      const appliedData = req.body;
+      const result = await appliedCollection.insertOne(appliedData);
+      res.send(result);
+    });
+
     // Send a ping to confirm a successful connection
-    // await client.db("admin").command({ ping: 1 });
+    await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
