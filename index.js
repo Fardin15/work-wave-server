@@ -55,9 +55,31 @@ async function run() {
     // get data for my job page
     app.get("/jobs/:email", async (req, res) => {
       const email = req.params.email;
-      console.log(email);
       const query = { owner_email: email };
       const result = await jobsCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // delete a job from database
+    app.delete("/job/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await jobsCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // update job in database
+    app.put("/job/:id", async (req, res) => {
+      const id = req.params.id;
+      const jobData = req.body;
+      const query = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updateJob = {
+        $set: {
+          ...jobData,
+        },
+      };
+      const result = await jobsCollection.updateOne(query, updateJob, options);
       res.send(result);
     });
 
