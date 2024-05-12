@@ -52,6 +52,15 @@ async function run() {
       res.send(result);
     });
 
+    // get data for my job page
+    app.get("/jobs/:email", async (req, res) => {
+      const email = req.params.email;
+      console.log(email);
+      const query = { owner_email: email };
+      const result = await jobsCollection.find(query).toArray();
+      res.send(result);
+    });
+
     // post applied data in database
     app.post("/applied", async (req, res) => {
       const appliedData = req.body;
