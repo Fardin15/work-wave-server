@@ -52,7 +52,7 @@ async function run() {
       res.send(result);
     });
 
-    // get data for my job page
+    // get data for my job page by email
     app.get("/jobs/:email", async (req, res) => {
       const email = req.params.email;
       const query = { owner_email: email };
@@ -87,6 +87,14 @@ async function run() {
     app.post("/applied", async (req, res) => {
       const appliedData = req.body;
       const result = await appliedCollection.insertOne(appliedData);
+      res.send(result);
+    });
+
+    // get data for applied page by email
+    app.get("/applied-jobs/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await appliedCollection.find(query).toArray();
       res.send(result);
     });
 
