@@ -8,20 +8,12 @@ const port = process.env.PORT || 8000;
 
 const app = express();
 
-const corsOptions = {
-  origin: [
-    "http://localhost:5173",
-    "http://localhost:5174",
-    "http://localhost:5175",
-    "http://localhost:5176",
-    "http://localhost:5177",
-  ],
-  credential: true,
-  optionSuccessStatus: 200,
+const corsConfig = {
+  origin: "*",
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
 };
-
-// middlewares
-app.use(cors(corsOptions));
+app.use(cors(corsConfig));
 app.use(express.json());
 // app.use(cookieParser());
 
@@ -91,9 +83,14 @@ async function run() {
     // get all jobs data
     app.get("/jobs", async (req, res) => {
       const search = req.query.search;
-      let query = {
-        job_title: { $regex: search, $options: "i" },
-      };
+      console.log(search);
+      let query = {};
+      if (search) {
+        query = {
+          job_title: { $regex: search, $options: "i" },
+        };
+      }
+
       const result = await jobsCollection.find(query).toArray();
       res.send(result);
     });
@@ -179,7 +176,7 @@ async function run() {
     });
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
