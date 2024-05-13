@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
-const jwt = require("jsonwebtoken");
-const cookieParser = require("cookie-parser");
+// const jwt = require("jsonwebtoken");
+// const cookieParser = require("cookie-parser");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const port = process.env.PORT || 8000;
@@ -23,25 +23,25 @@ const corsOptions = {
 // middlewares
 app.use(cors(corsOptions));
 app.use(express.json());
-app.use(cookieParser());
+// app.use(cookieParser());
 
 // verify jwt middleware
-const verifyToken = (req, res, next) => {
-  const token = req.cookies?.token;
-  if (!token) {
-    return res.status(401).send({ message: "unauthorized access" });
-  }
-  if (token) {
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (error, decoded) => {
-      if (error) {
-        return res.status(401).send({ message: "unauthorized access" });
-      }
-      console.log(decoded);
-      req.user = decoded;
-      next();
-    });
-  }
-};
+// const verifyToken = (req, res, next) => {
+//   const token = req.cookies?.token;
+//   if (!token) {
+//     return res.status(401).send({ message: "unauthorized access" });
+//   }
+//   if (token) {
+//     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (error, decoded) => {
+//       if (error) {
+//         return res.status(401).send({ message: "unauthorized access" });
+//       }
+//       console.log(decoded);
+//       req.user = decoded;
+//       next();
+//     });
+//   }
+// };
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.lnrcai2.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
@@ -61,32 +61,32 @@ async function run() {
     const appliedCollection = client.db("workWave").collection("appliedJobs");
 
     // jwt generator
-    app.post("/jwt", async (req, res) => {
-      const email = req.body;
-      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: "365d",
-      });
-      res
-        .cookie("token", token, {
-          httpOnly: true,
-          secure: true,
-          sameSite: "none",
-          maxAge: 60 * 60 * 1000,
-        })
-        .send({ success: true });
-    });
+    // app.post("/jwt", async (req, res) => {
+    //   const email = req.body;
+    //   const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+    //     expiresIn: "365d",
+    //   });
+    //   res
+    //     .cookie("token", token, {
+    //       httpOnly: true,
+    //       secure: true,
+    //       sameSite: "none",
+    //       maxAge: 60 * 60 * 1000,
+    //     })
+    //     .send({ success: true });
+    // });
 
     // clear toke on log out
-    app.get("/logout", (req, res) => {
-      res
-        .clearCookie("token", {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-          maxAge: 0,
-        })
-        .send({ success: true });
-    });
+    // app.get("/logout", (req, res) => {
+    //   res
+    //     .clearCookie("token", {
+    //       httpOnly: true,
+    //       secure: process.env.NODE_ENV === "production",
+    //       sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+    //       maxAge: 0,
+    //     })
+    //     .send({ success: true });
+    // });
 
     // get all jobs data
     app.get("/jobs", async (req, res) => {
@@ -102,14 +102,14 @@ async function run() {
       res.send(result);
     });
 
-    // post job data in database
+    // post a job data in database
     app.post("/job", async (req, res) => {
       const jobData = req.body;
       const result = await jobsCollection.insertOne(jobData);
       res.send(result);
     });
 
-    // get data for my job page by email
+    // get data for my job page which i posted by email
     app.get("/jobs/:email", async (req, res) => {
       const email = req.params.email;
       const query = { owner_email: email };
@@ -125,7 +125,7 @@ async function run() {
       res.send(result);
     });
 
-    // update job in database
+    // update jobs details in database
     app.put("/job/:id", async (req, res) => {
       const id = req.params.id;
       const jobData = req.body;
@@ -140,7 +140,7 @@ async function run() {
       res.send(result);
     });
 
-    // post applied data in database
+    // post applied on jobs and save data in database
     app.post("/applied", async (req, res) => {
       const appliedData = req.body;
       const result = await appliedCollection.insertOne(appliedData);
@@ -151,10 +151,7 @@ async function run() {
     app.get("/applied-jobs/:email", async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
-      const filter = req.query.filter;
-      let filterQuery = {};
-      if (filter) filterQuery = { category: filter };
-      const result = await appliedCollection.find(query, filterQuery).toArray();
+      const result = await appliedCollection.find(query).toArray();
       res.send(result);
     });
 
@@ -163,8 +160,8 @@ async function run() {
       const filter = req.query.filter;
       let query = {};
       if (filter) query = { category: filter };
-      const count = await appliedCollection.countDocuments(query);
-      res.send({ count });
+      const result = await appliedCollection.find(query).toArray();
+      res.send(result);
     });
 
     // Send a ping to confirm a successful connection
