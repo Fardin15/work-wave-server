@@ -91,7 +91,6 @@ async function run() {
     // get all jobs data
     app.get("/jobs", async (req, res) => {
       const search = req.query.search;
-      console.log(search);
       let query = {
         job_title: { $regex: search, $options: "i" },
       };
@@ -149,6 +148,16 @@ async function run() {
     app.post("/applied", async (req, res) => {
       const appliedData = req.body;
       const result = await appliedCollection.insertOne(appliedData);
+
+      // update applicants number
+      const updateDoc = {
+        $inc: { job_applicants_number: 1 },
+      };
+      const query = { _id: new ObjectId(appliedData.jobId) };
+      const updateApplicantsNumber = await jobsCollection.updateOne(
+        query,
+        updateDoc
+      );
       res.send(result);
     });
 
